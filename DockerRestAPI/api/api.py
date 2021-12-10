@@ -3,6 +3,9 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
 from pymongo import MongoClient
+from dotenv import load_dotenv
+import os
+
 # Instantiate the app
 app = Flask(__name__)
 api = Api(app)
@@ -11,6 +14,8 @@ client = MongoClient("db", 27017)
 db = client.tododb
 
 mongo_limit = 10000
+load_dotenv()
+app.secret_key = os.getenv('SECRET_KEY')
 
 
 class ListOpenOnly(Resource):

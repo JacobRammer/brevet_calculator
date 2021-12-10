@@ -11,7 +11,7 @@ load_dotenv()
 
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'for dev')
+app.secret_key = os.getenv('SECRET_KEY')
 
 client = MongoClient("db", 27017)
 db = client.tododb
@@ -29,7 +29,6 @@ db = client.tododb
 @app.route('/')
 def todo():
 
-    return os.getenv('SECRET_KEY', 'for dev')
     _items = db.tododb.find()
     items = [item for item in _items]
 
