@@ -110,10 +110,10 @@ def _calc_times():
     described at https://rusa.org/octime_alg.html.
     Expects one URL-encoded argument, the number of miles.
     """
-    app.logger.debug("Got a JSON request")
+    # app.logger.debug("Got a JSON request")
     km = request.args.get('km', 999, type=float)
-    app.logger.debug("km={}".format(km))
-    app.logger.debug("request.args: {}".format(request.args))
+    # app.logger.debug("km={}".format(km))
+    # app.logger.debug("request.args: {}".format(request.args))
     distance = request.args.get("distance", 200, int)
     date = request.args.get("start_date")
     time = request.args.get("start_time")

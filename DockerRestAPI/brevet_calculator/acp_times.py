@@ -38,7 +38,6 @@ def calculate_time(control_dist, type: list, start_time):
             # print(f"Hours: {hours}, Minutes: {minutes}")
             start_time = start_time.shift(hours=hours, minutes=minutes)
             control_dist -= checkpoint
-
     return start_time
 
 
