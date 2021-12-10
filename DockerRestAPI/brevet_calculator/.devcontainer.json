@@ -1,8 +1,0 @@
-{
-  "name": "brevet",
-  "dockerComposeFile": ["../docker-compose.yml"],
-  "service": "brevet",
-  "shutdownAction": "none",
-  "extensions": ["2gua.rainbow-brackets", "angelo-breuer.clock", "ankitcode.firefly", "christian-kohler.path-intellisense", "dongli.python-preview", "formulahendry.code-runner", "Gruntfuggly.todo-tree", "hiukky.flate", "icrawl.discord-vscode", "KevinRose.vsc-python-indent", "mechatroner.rainbow-csv", "michelemelluso.gitignore", "ms-azuretools.vscode-docker", "ms-python.python", "ms-python.vscode-pylance", "ms-toolsai.jupyter", "ms-toolsai.jupyter-keymap", "ms-toolsai.jupyter-renderers", "ms-vscode-remote.remote-ssh", "ms-vscode-remote.remote-ssh-edit", "ms-vscode.cpptools", "streetsidesoftware.code-spell-checker", "stuart.unique-window-colors", "TabNine.tabnine-vscode", "tomoki1207.pdf", "wayou.vscode-todo-highlight"],
-  "workspaceFolder": "/workspace/brevet_calculator"
-}
