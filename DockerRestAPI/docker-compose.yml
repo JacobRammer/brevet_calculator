@@ -1,7 +1,7 @@
 version: '3'  # version of compose format 
 
 services:
-  laptop-service:
+  api-service:
     build: ./api
     volumes:
       - .:/workspace:cached
@@ -13,18 +13,6 @@ services:
     image: mongo:latest
     ports:
       - "5003:27017"  # for MongoDB compass
-
-  website:
-    build: ./website
-#    image: php:apache
-    volumes:
-      - .:/workspace:cached
-    ports:
-      - "5001:80"  # host:container
-    depends_on:
-      - api-service  # website is not going to work unless api-service is running
-    environment:
-      - PYTHONUNBUFFERED=1
 
   brevet:
     build: ./brevet_calculator

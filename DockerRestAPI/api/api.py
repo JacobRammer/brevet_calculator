@@ -130,7 +130,7 @@ class ListCloseOnly(Resource):
 
 
 class ListAllCSV(Resource):
-    """"
+    """
     Lists all brevet control points with their
     open / close time(s).
     """
@@ -188,7 +188,7 @@ class ListAllCSV(Resource):
 
 
 class ListOpenOnlyCSV(Resource):
-    """"
+    """
     Lists all brevet control points with their
     open / close time(s).
     """

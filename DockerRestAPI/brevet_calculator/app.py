@@ -4,14 +4,13 @@ import flask
 from pymongo import MongoClient
 import arrow
 import acp_times
-import test
+import requests
 
 app = Flask(__name__)
 
-client = MongoClient("db", 27017) # TODO
-# client = MongoClient("mongodb+srv://jrammer:jrammer@cluster0.v2itw.mongodbnet/myFirstDatabase?retryWrites=true&w=majority")
-# client = MongoClient('mongodb://mongodb:27017/')
+client = MongoClient("db", 27017)
 db = client.tododb
+
 
 # session["Distance"] = None
 # session["start_time"] = None
@@ -30,8 +29,14 @@ def todo():
     return render_template('calc.html', items=items), 200
 
 
+# @app.route("/listAll", methods=["POST", "GET"])
+@app.route("/<path:url>", methods=["POST", "GET"])
+def list_all(url):
+    resp = requests.get("http://api-service/" + url)
+    return resp.content, resp.status_code, resp.headers.items()
+
+
 def remove_empty(lst):
-    
     temp = []
     for i in lst:
         if i != "":
@@ -39,56 +44,42 @@ def remove_empty(lst):
     return temp
 
 
-def build_dict(km: list, open: list, close: list) -> dict:
-    
+def build_dict(km: list, open: list, close: list):
     return_dict = []
     for i in range(len(km)):
         # return_dict.append("KM": km[i]) = [open[i], close[i]]
         temp = {
-            "km": km[i], 
-            "open": open[i], 
+            "km": km[i],
+            "open": open[i],
             "close": close[i]
         }
         return_dict.append(temp)
     print(f"return dict: {return_dict}")
     return return_dict
-    
 
-@app.route('/todo', methods=["POST"])
-def display():
-    _items = db.tododb.find()
-    items = [item for item in _items]
-    if len(items) == 0:
-        test.test_display("Nothing to display")
-        return "No data to display"
-    return render_template('todo.html', items=items)
-    
 
 @app.route('/new', methods=['POST'])
 def new():
-    
-    #get form data as list
+    # get form data as list
     open_time = request.form.getlist("open")
     close_time = request.form.getlist("close")
     km = request.form.getlist("km")
-    
+
     # remove empty strings in each list
     km = remove_empty(km)
     close_time = remove_empty(close_time)
     open_time = remove_empty(open_time)
-    
+
     controls = build_dict(km, open_time, close_time)
     # print("date " + request.args.get("start_date"))
-    
-    
+
     # print(f"km: {close_time}, {open_time}, {km}")
     # print(f"ffffff {f}")
     # print(f.getlist("km"))
-    
+
     if len(request.form['name']) == 0:
-        test.test_submit("Cannot submit data! At least one input is missing")
         return render_template('error.html'), "Form not filled out"
-    
+
     item_doc = {
         'BrevetName': request.form['name'],  # name of the race
         "Distance": str(session["Distance"]),
@@ -96,7 +87,7 @@ def new():
         "StartTime": session["start_time"],
         "Controls": controls
         # 'description': request.form['description'],
-        
+
     }
     db.tododb.insert_one(item_doc)
 
