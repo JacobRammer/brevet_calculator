@@ -1,7 +1,6 @@
 import os
-from flask import Flask, redirect, url_for, request, render_template, session
+from flask import Flask, redirect, url_for, request, render_template, session, jsonify
 import flask
-from pymongo import MongoClient
 import arrow
 import acp_times
 import requests
@@ -13,31 +12,30 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
-client = MongoClient("db", 27017)
-db = client.tododb
-
-
-# session["Distance"] = None
-# session["start_time"] = None
-# session["start_date"] = None
-
-
-# def help():
-#     print("help")
-#     print(new())
 
 @app.route('/')
-def todo():
+def index():
 
-    _items = db.tododb.find()
-    items = [item for item in _items]
-
-    return render_template('calc.html', items=items), 200
+    return render_template('calc.html'), 200
 
 
 # @app.route("/listAll", methods=["POST", "GET"])
 @app.route("/<path:url>", methods=["POST", "GET"])
-def list_all(url):
+@app.route("/<path:url>/<path:file_type>/", methods=["POST", "GET"])
+def list_all(url, file_type=None, limit=str(0)):
+
+    if file_type is not None:  # if we specify json or csv format
+        """
+        This will parse the url correctly if we specify the file type
+        and / or a top query. 
+        http://localhost:5000/listClosedOnly/json/?top=4        
+        """
+        if request.args.get("top"):
+            limit = request.args.get("top")
+        resp = requests.get("http://api-service/" + url + "/" + file_type + "?top=" + limit)
+        return resp.content, resp.status_code, resp.headers.items()
+
+    # if we only do listAll, listClosedOnly, etc
     resp = requests.get("http://api-service/" + url)
     return resp.content, resp.status_code, resp.headers.items()
 
@@ -64,7 +62,7 @@ def build_dict(km: list, open: list, close: list):
     return return_dict
 
 
-@app.route('/new', methods=['POST'])
+@app.route('/new', methods=['POST', "GET"])
 def new():
     # get form data as list
     open_time = request.form.getlist("open")
@@ -77,11 +75,6 @@ def new():
     open_time = remove_empty(open_time)
 
     controls = build_dict(km, open_time, close_time)
-    # print("date " + request.args.get("start_date"))
-
-    # print(f"km: {close_time}, {open_time}, {km}")
-    # print(f"ffffff {f}")
-    # print(f.getlist("km"))
 
     if len(request.form['name']) == 0:
         return render_template('error.html'), "Form not filled out"
@@ -92,13 +85,14 @@ def new():
         "StartDate": session["start_date"],
         "StartTime": session["start_time"],
         "Controls": controls
-        # 'description': request.form['description'],
 
     }
-    db.tododb.insert_one(item_doc)
 
-    return redirect(url_for('todo'))
+    # print(item_doc)
+    headers = {'Content-type': 'application/json'}
+    resp = requests.post("http://api-service/new", json=item_doc)
 
+    return redirect(url_for('index'))
 
 @app.route("/_calc_times")
 def _calc_times():
@@ -107,6 +101,7 @@ def _calc_times():
     described at https://rusa.org/octime_alg.html.
     Expects one URL-encoded argument, the number of miles.
     """
+
     # app.logger.debug("Got a JSON request")
     km = request.args.get('km', 999, type=float)
     # app.logger.debug("km={}".format(km))
@@ -126,5 +121,5 @@ def _calc_times():
 
 
 if __name__ == "__main__":
-    app.secret_key = 'xlPbAQcpnHge2CVmtYG3t9pDYatJSkUTX'
+    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
     app.run(host='0.0.0.0', debug=True)

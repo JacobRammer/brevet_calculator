@@ -1,16 +1,20 @@
 # Laptop Service
+import json
 
-from flask import Flask, request
-from flask_restful import Resource, Api
+from flask import Flask, request, jsonify
+from flask_restful import Resource, Api, reqparse
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
+import requests
+import ast
 
 # Instantiate the app
 app = Flask(__name__)
 api = Api(app)
 app.config['JSON_SORT_KEYS'] = False
 client = MongoClient("db", 27017)
+# db = client.brevet
 db = client.tododb
 
 mongo_limit = 10000
@@ -42,11 +46,11 @@ class ListOpenOnly(Resource):
         return return_dict
 
     def get(self):
-        limit = 1000
+        limit = 0
         try:
             top = int(request.args.get('top'))
-            if top != 0:
-                limit = top
+            if top != 0 and top is not None:
+                limit = int(top)
         except:
             pass
         _items = db.tododb.find().limit(limit)
@@ -120,9 +124,9 @@ class ListCloseOnly(Resource):
     def get(self):
         lim = 1000
         try:
-            top = int(request.args.get('top'))
-            if top != 0:
-                lim = top
+            top = request.args.get('top')
+            if top != 0 and top is not None and top is not None:
+                lim = int(top)
         except:
             pass
         _items = db.tododb.find().limit(lim)
@@ -166,8 +170,8 @@ class ListAllCSV(Resource):
         limit = 1000
         try:
             top = int(request.args.get('top'))
-            if top != 0:
-                limit = top
+            if top != 0 and top is not None:
+                limit = int(top)
         except:
             pass
         _items = db.tododb.find().limit(mongo_limit)
@@ -224,8 +228,8 @@ class ListOpenOnlyCSV(Resource):
         limit = 1000
         try:
             top = int(request.args.get('top'))
-            if top != 0:
-                limit = top
+            if top != 0 and top is not None:
+                limit = int(top)
         except:
             pass
         _items = db.tododb.find().limit(mongo_limit)
@@ -282,8 +286,8 @@ class ListCloseOnlyCSV(Resource):
         limit = 1000
         try:
             top = int(request.args.get('top'))
-            if top != 0:
-                limit = top
+            if top != 0 and top is not None:
+                limit = int(top)
         except:
             pass
         _items = db.tododb.find().limit(mongo_limit)
@@ -309,16 +313,34 @@ class ListCloseOnlyCSV(Resource):
         return return_str.strip('"')
 
 
+class NewEntry(Resource):
+    """
+    Insert a new entry into the database
+    """
+
+    def __init__(self):
+        self.post_args = reqparse.RequestParser()
+
+    def post(self):
+        json_to_str = request.data.decode("utf-8")  # json parameters to str
+        str_to_dict = ast.literal_eval(
+            json_to_str)  # convert back to dict for mongo
+        db.tododb.insert_one(str_to_dict)
+        return jsonify({"status": "successfully inserted doc"})
+
+
 # Create routes
 # Another way, without decorators
 # api.add_resource(Laptop, '/')
 api.add_resource(ListAll, '/listAll', "/", "/listAll/json")
 api.add_resource(ListOpenOnly, "/listOpenOnly", "/listOpenOnly/json")
-api.add_resource(ListCloseOnly, "/listCloseOnly", "/listCloseOnly/json", )
+api.add_resource(ListCloseOnly, "/listClosedOnly", "/listClosedOnly/json", )
 api.add_resource(ListAllCSV, "/listAll/csv")
 api.add_resource(ListOpenOnlyCSV, "/listOpenOnly/csv")
-api.add_resource(ListCloseOnlyCSV, "/listCloseOnly/csv")
+api.add_resource(ListCloseOnlyCSV, "/listClosedOnly/csv")
+api.add_resource(NewEntry, "/new")
 
 # Run the application
 if __name__ == '__main__':
+    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
     app.run(host='0.0.0.0', port=80, debug=True)
