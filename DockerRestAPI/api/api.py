@@ -18,6 +18,7 @@ app.config['JSON_SORT_KEYS'] = False
 mongo_limit = 10000
 load_dotenv()
 app.secret_key = os.getenv('SECRET_KEY')
+# client = MongoClient("db", 27017)
 client = MongoClient(os.getenv("ATLAS"))
 # db = client.brevet
 db = client.tododb
