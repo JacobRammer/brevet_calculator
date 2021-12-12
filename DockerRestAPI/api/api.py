@@ -13,13 +13,14 @@ import ast
 app = Flask(__name__)
 api = Api(app)
 app.config['JSON_SORT_KEYS'] = False
-client = MongoClient("db", 27017)
-# db = client.brevet
-db = client.tododb
+
 
 mongo_limit = 10000
 load_dotenv()
 app.secret_key = os.getenv('SECRET_KEY')
+client = MongoClient(os.getenv("ATLAS"))
+# db = client.brevet
+db = client.tododb
 
 
 class ListOpenOnly(Resource):

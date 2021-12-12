@@ -45,3 +45,8 @@ In order to run this on your local machine, you will need to
 create .env files within both the api and brevet_calculator
 folders with a single key SECRET_KEY=your_secret_key
 
+I have also found out that mongodb does not work
+correctly on raspberry pi and I am not going to port
+this over to outdated pymongo versions.
+Add ATLAS=atlas_url to use mongo atlas cloud hosting
+
